@@ -40,6 +40,9 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRole role;
 
+    @Column(length = 20)
+    private String confirmed;
+
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
