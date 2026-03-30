@@ -1,5 +1,7 @@
 package org.example.onlinecourse.service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.onlinecourse.dto.CategoryDto;
 import org.example.onlinecourse.model.Category;
 import org.example.onlinecourse.repository.CategoryRepository;
 import org.springframework.stereotype.Service;
@@ -9,42 +11,48 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
-        this.categoryRepository = categoryRepository;
+    public List<CategoryDto> findAll() {
+        return categoryRepository.findAll()
+                .stream()
+                .map(c -> CategoryDto.builder()
+                        .id(c.getId())
+                        .name(c.getName())
+                        .description(c.getDescription())
+                        .iconUrl(c.getIconUrl())
+                        .isActive(c.getIsActive())
+                        .build()
+                ).toList();
     }
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    public void create(CategoryDto dto) {
+
+        Category category = Category.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .iconUrl(dto.getIconUrl())
+                .isActive(true)
+                .createdAt(LocalDate.now())
+                .build();
+
+        categoryRepository.save(category);
     }
 
-    public Category getCategoryById(Long id) {
-        return categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+    public void update(Long id, CategoryDto dto) {
+
+        Category category = categoryRepository.findById(id).orElseThrow();
+
+        category.setName(dto.getName()); // UPDATE ✔
+        category.setDescription(dto.getDescription());
+
+        categoryRepository.save(category);
     }
 
-    @Transactional
-    public Category createCategory(Category category) {
-        category.setCreatedAt(LocalDate.now());
-        category.setIsActive(true);
-        return categoryRepository.save(category);
-    }
-
-    @Transactional
-    public Category updateCategory(Long id, Category categoryDetails) {
-        Category category = getCategoryById(id);
-        category.setName(categoryDetails.getName());
-        category.setDescription(categoryDetails.getDescription());
-        category.setIconUrl(categoryDetails.getIconUrl());
-        category.setIsActive(categoryDetails.getIsActive());
-        return categoryRepository.save(category);
-    }
-
-    @Transactional
-    public void deleteCategory(Long id) {
+    public void delete(Long id) {
         categoryRepository.deleteById(id);
     }
 }

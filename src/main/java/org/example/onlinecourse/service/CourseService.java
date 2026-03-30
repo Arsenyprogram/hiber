@@ -1,51 +1,52 @@
 package org.example.onlinecourse.service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.onlinecourse.dto.CourseDto;
 import org.example.onlinecourse.model.Course;
+import org.example.onlinecourse.model.CourseLevel;
 import org.example.onlinecourse.repository.CourseRepository;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CourseService {
 
     private final CourseRepository courseRepository;
 
-    public CourseService(CourseRepository courseRepository) {
-        this.courseRepository = courseRepository;
-    }
-
-    public List<Course> getAllCourses() {
+    public List<Course> findAll() {
         return courseRepository.findAll();
     }
 
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Course not found"));
+    public void create(CourseDto dto) {
+
+        Course course = Course.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .price(dto.getPrice())
+                .durationInHours(1)
+                .language("EN")
+                .createdAt(LocalDate.now())
+                .level(CourseLevel.BEGINNER)
+                .build();
+
+        courseRepository.save(course);
     }
 
-    @Transactional
-    public Course createCourse(Course course) {
-        course.setCreatedAt(LocalDate.now());
-        return courseRepository.save(course);
+    public void update(Long id, CourseDto dto) {
+
+        Course course = courseRepository.findById(id).orElseThrow();
+
+        course.setTitle(dto.getTitle());
+        course.setPrice(dto.getPrice());
+
+        courseRepository.save(course);
     }
 
-    @Transactional
-    public Course updateCourse(Long id, Course courseDetails) {
-        Course course = getCourseById(id);
-        course.setTitle(courseDetails.getTitle());
-        course.setDescription(courseDetails.getDescription());
-        course.setPrice(courseDetails.getPrice());
-        course.setDurationInHours(courseDetails.getDurationInHours());
-        course.setLanguage(courseDetails.getLanguage());
-        course.setLevel(courseDetails.getLevel());
-        return courseRepository.save(course);
-    }
-
-    @Transactional
-    public void deleteCourse(Long id) {
+    public void delete(Long id) {
         courseRepository.deleteById(id);
     }
 }

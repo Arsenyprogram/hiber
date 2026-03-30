@@ -1,5 +1,6 @@
 package org.example.onlinecourse.controller;
 
+import lombok.RequiredArgsConstructor;
 import org.example.onlinecourse.dto.UserRegistrationDto;
 import org.example.onlinecourse.service.UserService;
 import org.springframework.stereotype.Controller;
@@ -9,33 +10,34 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 
 @Controller
+@RequiredArgsConstructor
 public class AuthController {
 
     private final UserService userService;
 
-    public AuthController(UserService userService) {
-        this.userService = userService;
-    }
-
-    @GetMapping("/login")
+    @GetMapping("/signIn")
     public String login() {
         return "login";
     }
 
-    @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
+    @GetMapping("/signUp")
+    public String registerPage(Model model) {
         model.addAttribute("user", new UserRegistrationDto());
-        return "register";
+        return "registration";
     }
 
-    @PostMapping("/register")
-    public String registerUser(@ModelAttribute("user") UserRegistrationDto registrationDto, Model model) {
+    @PostMapping("/signUp")
+    public String register(@ModelAttribute("user") UserRegistrationDto dto,
+                           Model model) {
+
         try {
-            userService.registerUser(registrationDto);
-            return "redirect:/login?success";
+            userService.register(dto);
+            return "redirect:/signIn";
+
         } catch (RuntimeException e) {
+
             model.addAttribute("error", e.getMessage());
-            return "register";
+            return "registration";
         }
     }
 }

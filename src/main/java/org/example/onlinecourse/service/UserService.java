@@ -1,5 +1,7 @@
 package org.example.onlinecourse.service;
 
+import lombok.RequiredArgsConstructor;
+import org.example.onlinecourse.dto.UserDto;
 import org.example.onlinecourse.dto.UserRegistrationDto;
 import org.example.onlinecourse.dto.UserUpdateDto;
 import org.example.onlinecourse.model.User;
@@ -14,67 +16,50 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    public void register(UserRegistrationDto dto) {
 
-    @Transactional
-    public User registerUser(UserRegistrationDto registrationDto) {
-        if (userRepository.existsByEmail(registrationDto.getEmail())) {
+        if (userRepository.findByEmail(dto.getEmail()).isPresent()) {
             throw new RuntimeException("Email already exists");
         }
 
-        User user = new User();
-        user.setFirstName(registrationDto.getFirstName());
-        user.setLastName(registrationDto.getLastName());
-        user.setEmail(registrationDto.getEmail());
-        user.setPassword(passwordEncoder.encode(registrationDto.getPassword()));
-        user.setAge(registrationDto.getAge());
-        user.setRegistrationDate(LocalDate.now());
-        user.setRole(UserRole.STUDENT);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setConfirmed("CONFIRMED");
+        User user = User.builder()
+                .firstName(dto.getFirstName())
+                .lastName(dto.getLastName())
+                .email(dto.getEmail())
+                .password(passwordEncoder.encode(dto.getPassword()))
+                .age(dto.getAge())
+                .registrationDate(LocalDate.now())
+                .role(UserRole.STUDENT)
+                .status(UserStatus.ACTIVE)
+                .build();
 
-        return userRepository.save(user);
-    }
-
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    public User getUserById(Long id) {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-    }
-
-    @Transactional
-    public User updateUser(UserUpdateDto updateDto) {
-        User user = getUserById(updateDto.getId());
-        user.setFirstName(updateDto.getFirstName());
-        user.setLastName(updateDto.getLastName());
-        user.setAge(updateDto.getAge());
-        return userRepository.save(user);
-    }
-
-    @Transactional
-    public void blockUser(Long id) {
-        User user = getUserById(id);
-        user.setStatus(UserStatus.BLOCKED);
-        user.setConfirmed("BLOCKED");
         userRepository.save(user);
     }
 
-    @Transactional
-    public void activateUser(Long id) {
-        User user = getUserById(id);
-        user.setStatus(UserStatus.ACTIVE);
-        user.setConfirmed("CONFIRMED");
+    public List<UserDto> findAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(u -> UserDto.builder()
+                        .id(u.getId())
+                        .firstName(u.getFirstName())
+                        .lastName(u.getLastName())
+                        .email(u.getEmail())
+                        .age(u.getAge())
+                        .role(u.getRole())
+                        .status(u.getStatus())
+                        .build()
+                ).toList();
+    }
+
+    public void updateUserStatus(Long id, UserStatus status) {
+        User user = userRepository.findById(id).orElseThrow();
+        user.setStatus(status);
         userRepository.save(user);
     }
 }

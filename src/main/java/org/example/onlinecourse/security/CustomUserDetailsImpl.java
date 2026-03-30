@@ -19,7 +19,7 @@ public class CustomUserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singleton(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
+        return Collections.singleton(new SimpleGrantedAuthority( user.getRole().name()));
     }
 
     @Override
@@ -49,6 +49,6 @@ public class CustomUserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.getStatus() == UserStatus.ACTIVE && "CONFIRMED".equals(user.getConfirmed());
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 }

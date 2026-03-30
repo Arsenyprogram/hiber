@@ -2,6 +2,7 @@ package org.example.onlinecourse.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.time.LocalDate;
 @Table(name = "lessons")
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Data
 public class Lesson {
 
