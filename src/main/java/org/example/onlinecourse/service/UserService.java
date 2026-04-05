@@ -62,4 +62,11 @@ public class UserService {
         user.setStatus(status);
         userRepository.save(user);
     }
+
+    public void updateName(String email, String firstName) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        user.setFirstName(firstName);
+        userRepository.save(user);
+    }
+
 }
